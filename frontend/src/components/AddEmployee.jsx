@@ -19,7 +19,7 @@ function AddEmployee() {
     }, [])
 
     const getDetail = (empId) => {
-        axios.get('http://localhost:8080/apiemp_selectbyempid/'+empId).then(res => {
+        axios.get('http://167.172.72.132:8080/apiemp_selectbyempid/'+empId).then(res => {
             setEmployee(res.data.data)
             const emp = res.data.data
             document.querySelector('[name=empno]').value = emp.empNo
@@ -40,7 +40,7 @@ function AddEmployee() {
     }
 
     const getDepartments = () => {
-        axios.get('http://localhost:8080/apidep_select').then(res => {
+        axios.get('http://167.172.72.132:8080/apidep_select').then(res => {
             setDepartments(res.data.data)
         })
     }
@@ -65,7 +65,7 @@ function AddEmployee() {
         } 
 
         if (employee != null) {
-            axios.put('http://localhost:8080/apiemp_update/'+employee.id, {empname, empdob, joindate, departmentId, salary, skill}).then(res => {
+            axios.put('http://167.172.72.132:8080/apiemp_update/'+employee.id, {empname, empdob, joindate, departmentId, salary, skill}).then(res => {
                 navigate('/', { replace: true });
             }).catch(err => {
                 console.log(err.response.status);
@@ -75,7 +75,7 @@ function AddEmployee() {
                 }
             })
         } else {
-            axios.post('http://localhost:8080/apiemp_insert', {empno, empname, empdob, joindate, departmentId, salary, skill}).then(res => {
+            axios.post('http://167.172.72.132:8080/apiemp_insert', {empno, empname, empdob, joindate, departmentId, salary, skill}).then(res => {
                 navigate('/', { replace: true });
             }).catch(err => {
                 console.log(err.response.status);

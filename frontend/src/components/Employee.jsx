@@ -22,7 +22,7 @@ function Employee() {
 
     const getEmployees = (offsetP = 0, limitP = 10, orderBy = 'empName') => {
         const keyword = document.querySelector('[name=searchtxt]').value
-        axios.get('http://localhost:8080/apiemp_select?offset='+offsetP+'&limit='+limitP+'&keyword='+keyword+'&orderBy='+orderBy+'&order='+order.current).then(res => {
+        axios.get('http://167.172.72.132:8080/apiemp_select?offset='+offsetP+'&limit='+limitP+'&keyword='+keyword+'&orderBy='+orderBy+'&order='+order.current).then(res => {
             setEmployees(res.data.data)
             setTotal(res.data.count)
             const cnt = res.data.count
@@ -45,7 +45,7 @@ function Employee() {
         const file = e.target.files[0];
         const data = new FormData();
         data.append('csv', file);
-        axios.post('http://localhost:8080/apicsv_upload', data).then(res => {
+        axios.post('http://167.172.72.132:8080/apicsv_upload', data).then(res => {
             console.log(res)
             alert("Complete")
         })
@@ -70,7 +70,7 @@ function Employee() {
     }
 
     const deleteEmp = (id) => {
-        axios.delete('http://localhost:8080/apiemp_delete/'+id).then(res => {
+        axios.delete('http://167.172.72.132:8080/apiemp_delete/'+id).then(res => {
             document.getElementById('pagi').value = 1
             changePage(1)
         })
