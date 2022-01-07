@@ -26,7 +26,9 @@ function AddEmployee() {
             document.querySelector('[name=empname]').value = emp.empName
             document.querySelector('[name=empdob]').value = showMdy(emp.empDob)
             document.querySelector('[name=joindate]').value = showMdy(emp.joinDate)
-            document.querySelector('[name=departmentId]').value = emp.departmentId
+            setTimeout(() => {
+                document.querySelector('[name=departmentId]').value = emp.departmentId
+            }, 2000)
             document.querySelector('[name=salary]').value = emp.salary
             var inputs = document.querySelectorAll('.skills');   
             for (var i = 0; i < inputs.length; i++) {   
