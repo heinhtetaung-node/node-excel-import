@@ -41,13 +41,12 @@ function Employee() {
     }
 
     const handleFileInput = (e) => {
-        alert('hrere')
         const file = e.target.files[0];
         const data = new FormData();
         data.append('csv', file);
         axios.post('http://167.172.72.132:8080/apicsv_upload', data).then(res => {
-            console.log(res)
             alert("Complete")
+            window.location.reload()
         })
     }
 
