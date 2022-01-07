@@ -19,7 +19,7 @@ function Employee() {
     }, [])
 
     const getEmployees = (offsetP = 0, limitP = 10) => {
-        axios.get('http://192.168.100.60:8080/apiemp_select?offset='+offsetP+'&limit='+limitP).then(res => {
+        axios.get('http://localhost:8080/apiemp_select?offset='+offsetP+'&limit='+limitP).then(res => {
             setEmployees(res.data.data)
             setTotal(res.data.count)
             const cnt = res.data.count
@@ -42,7 +42,7 @@ function Employee() {
         const file = e.target.files[0];
         const data = new FormData();
         data.append('csv', file);
-        axios.post('http://192.168.100.60:8080/apicsv_upload', data).then(res => {
+        axios.post('http://localhost:8080/apicsv_upload', data).then(res => {
             console.log(res)
             alert("Complete")
         })
