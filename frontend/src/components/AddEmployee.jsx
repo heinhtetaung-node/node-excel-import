@@ -1,17 +1,43 @@
 import PieChart from './PieChart'
 import BarChart from './BarChart'
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios'
 function AddEmployee() {
 
     const [errors, setErrors] = useState([]);
     const [departments, setDepartments] = useState([]);
+    const [employee, setEmployee] = useState(null);
     const navigate = useNavigate();
+    const { empId } = useParams();
 
     useEffect(() => {
+        if (empId) {
+            getDetail(empId)
+        }
         getDepartments()
     }, [])
+
+    const getDetail = (empId) => {
+        axios.get('http://localhost:8080/apiemp_selectbyempid/'+empId).then(res => {
+            setEmployee(res.data.data)
+            const emp = res.data.data
+            document.querySelector('[name=empno]').value = emp.empNo
+            document.querySelector('[name=empname]').value = emp.empName
+            document.querySelector('[name=empdob]').value = showMdy(emp.empDob)
+            document.querySelector('[name=joindate]').value = showMdy(emp.joinDate)
+            document.querySelector('[name=departmentId]').value = emp.departmentId
+            document.querySelector('[name=salary]').value = emp.salary
+            var inputs = document.querySelectorAll('.skills');   
+            for (var i = 0; i < inputs.length; i++) {   
+                const ski = inputs[i].value
+                const filt = JSON.parse(emp.skills).filter(e => e.Name === ski)
+                if (filt.length > 0) {
+                    inputs[i].checked = true
+                }
+            } 
+        })
+    }
 
     const getDepartments = () => {
         axios.get('http://localhost:8080/apidep_select').then(res => {
@@ -37,16 +63,34 @@ function AddEmployee() {
                 })
             }
         } 
-        
-        axios.post('http://localhost:8080/apiemp_insert', {empno, empname, empdob, joindate, departmentId, salary, skill}).then(res => {
-            navigate('/', { replace: true });
-        }).catch(err => {
-            console.log(err.response.status);
-            console.log(err.response.data);
-            if (err.response.status == 400) {
-                setErrors(err.response.data.errors);
-            }
-        })
+
+        if (employee != null) {
+            axios.put('http://localhost:8080/apiemp_update/'+employee.id, {empname, empdob, joindate, departmentId, salary, skill}).then(res => {
+                navigate('/', { replace: true });
+            }).catch(err => {
+                console.log(err.response.status);
+                console.log(err.response.data);
+                if (err.response.status == 400) {
+                    setErrors(err.response.data.errors);
+                }
+            })
+        } else {
+            axios.post('http://localhost:8080/apiemp_insert', {empno, empname, empdob, joindate, departmentId, salary, skill}).then(res => {
+                navigate('/', { replace: true });
+            }).catch(err => {
+                console.log(err.response.status);
+                console.log(err.response.data);
+                if (err.response.status == 400) {
+                    setErrors(err.response.data.errors);
+                }
+            })
+        }
+    }
+
+    const showMdy = (date) => {
+        const dateObj = new Date(date);
+        console.log(dateObj.getFullYear() + '-' + ( (dateObj.getMonth()+1 < 10)? '' + dateObj.getMonth()+1 : dateObj.getMonth()+1 ) + '-' + ( (dateObj.getDate() < 10)? '0' + dateObj.getDate() : dateObj.getDate() ))
+        return dateObj.getFullYear() + '-' + ( (dateObj.getMonth() < 9)? '0'+(dateObj.getMonth()+1) : dateObj.getMonth()+1 ) + '-' + ( (dateObj.getDate() < 10)? '0' + dateObj.getDate() : dateObj.getDate() )
     }
 
     return (
@@ -68,7 +112,7 @@ function AddEmployee() {
                         EMPLOYEE NO : 
                     </div>
                     <div className='w-2/3 p-2 flex flex-col'>
-                        <input type="text" name="empno" className='w-full p-1' />
+                        <input type="text" name="empno" className='w-full p-1' disabled={employee != null}/>
                         
                     </div>
                 </div>
@@ -101,7 +145,7 @@ function AddEmployee() {
                         DEPARTMENT : 
                     </div>
                     <div className='w-2/3 p-2 '>
-                        <select className='p-1' name='departmentId'>
+                        <select className='p-1' name='departmentId' >
                             {departments.map(d => {
                                 return (
                                     <option value={d.id}>{d.code}</option>

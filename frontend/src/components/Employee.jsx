@@ -1,7 +1,7 @@
 import PieChart from './PieChart'
 import BarChart from './BarChart'
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import csv from '../sample-csv.csv'
 
@@ -12,14 +12,17 @@ function Employee() {
     const [noOfLink, setNoOfLink] = useState([])
     const [limit, setLimit] = useState(10)
     const [offset, setOffset] = useState(0)
+    const navigate = useNavigate();
+    const order = useRef('asc');
 
     useEffect(() => {
         document.getElementById('pagi').value = 1
         getEmployees()
     }, [])
 
-    const getEmployees = (offsetP = 0, limitP = 10) => {
-        axios.get('http://localhost:8080/apiemp_select?offset='+offsetP+'&limit='+limitP).then(res => {
+    const getEmployees = (offsetP = 0, limitP = 10, orderBy = 'empName') => {
+        const keyword = document.querySelector('[name=searchtxt]').value
+        axios.get('http://localhost:8080/apiemp_select?offset='+offsetP+'&limit='+limitP+'&keyword='+keyword+'&orderBy='+orderBy+'&order='+order.current).then(res => {
             setEmployees(res.data.data)
             setTotal(res.data.count)
             const cnt = res.data.count
@@ -66,6 +69,22 @@ function Employee() {
         changePage(document.getElementById('pagi').value)
     }
 
+    const deleteEmp = (id) => {
+        axios.delete('http://localhost:8080/apiemp_delete/'+id).then(res => {
+            document.getElementById('pagi').value = 1
+            changePage(1)
+        })
+    }
+
+    const changeOrder = (ord) => {
+        if (order.current == 'asc') {
+            order.current = 'desc'
+        } else {
+            order.current = 'asc'
+        }
+        getEmployees(0, 10, ord)
+    }
+
     return (
         <div className=' min-h-full w-full'>
             <div className="w-screen h-auto  flex flex-col justify-start items-center p-4">
@@ -79,18 +98,18 @@ function Employee() {
                     </a>
                     <input type="file" className="hidden" id="csvfile" onChange={handleFileInput}/>
                     <button className="ml-2 p-2 bg-blue-400" onClick={() => document.getElementById('csvfile').click()}>Import Csv Data</button>
-                    
                 </div>
+                <input type="text" placeholder="Search" onChange={(e) => getEmployees()} name="searchtxt" />
                 <table className="w-full mt-10">
                     <thead>
                     <tr>
                         <th className="p-2 border-2 border-gray-400">#</th>
-                        <th className="p-2 border-2 border-gray-400">EMPLOYEE NO</th>
-                        <th className="p-2 border-2 border-gray-400">EMPLOYEE NAME</th>
+                        <th className="p-2 border-2 border-gray-400"><a href="#" onClick={() => changeOrder('empNo')}>EMPLOYEE NO &#9660; &#9650;</a></th>
+                        <th className="p-2 border-2 border-gray-400"><a href="#" onClick={() => changeOrder('empName')}>EMPLOYEE NAME &#9660; &#9650;</a></th>
                         <th className="p-2 border-2 border-gray-400">DOB</th>
                         <th className="p-2 border-2 border-gray-400">JOIN DATE</th>
                         <th className="p-2 border-2 border-gray-400">SALARY</th>
-                        <th className="p-2 border-2 border-gray-400">DEPARTMENT</th>
+                        <th className="p-2 border-2 border-gray-400"><a href="#" onClick={() => changeOrder('departmentId')}>DEPARTMENT &#9660; &#9650;</a></th>
                         <th className="p-2 border-2 border-gray-400">SKILLS</th>
                         <th className="p-2 border-2 border-gray-400">Options</th>
                     </tr>
@@ -111,7 +130,10 @@ function Employee() {
                                         return (<span>{s.Name}&nbsp;</span>) 
                                     })}
                                 </td>
-                                <td className="p-2 border-2 border-gray-400"></td>
+                                <td className="p-2 border-2 border-gray-400">
+                                    <button onClick={() => navigate('/edit/'+e.id, { replace: true })}>Edit</button>
+                                    <button className="ml-4" onClick={()=> deleteEmp(e.id)}>Delete</button>
+                                </td>
                             </tr>
                         )
                     })}

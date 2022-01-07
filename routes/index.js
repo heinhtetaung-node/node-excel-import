@@ -5,6 +5,7 @@ const db = require("../models");
 const Employee = db.employee;
 const fs = require("fs"),
       csv = require("csv-parser");
+const { Op } = require("sequelize");
 
 router.post("/apiemp_insert", 
 	check('empno').notEmpty().withMessage('EmpNo is required'),
@@ -15,7 +16,6 @@ router.post("/apiemp_insert",
 	check('salary').notEmpty().withMessage('salary is required'),
 	check('skill').notEmpty().withMessage('skill is required'),
 	function (req, res) {	
-	console.log(req.body)
 	const errors = validationResult(req)
 	if (!errors.isEmpty()) {
 		return res.status(400).json({ errors: errors.array() });
@@ -51,10 +51,20 @@ router.post("/apiemp_insert",
 router.get("/apiemp_select", function (req, res) {	
 	const limit = (req.query.limit)? req.query.limit : 10
 	const offset = (req.query.offset)? req.query.offset : 0
+	const keyword = (req.query.keyword)? req.query.keyword : ''
+	const order = (req.query.order)? req.query.order : 'asc'
+	const orderBy = (req.query.orderBy)? req.query.orderBy : 'empName'
 	Employee.findAll({ 
 		include : [db.department],
 		limit : parseInt(limit),
-		offset : parseInt(offset)
+		offset : parseInt(offset),
+		where : {
+			[Op.or] : [
+				{ empNo : {[Op.like] : '%'+keyword+'%'} },
+				{ empName : {[Op.like] : '%'+keyword+'%'} },
+			]
+		},
+		order: [ [ orderBy, order ] ]
 	}).then(async data => {
 		const count = await Employee.count();
 		return res.json({ success : true, data : data, count : count });
@@ -82,7 +92,6 @@ router.get("/apidep_select", function (req, res) {
 });
 
 router.put("/apiemp_update/:emp_id", 
-	check('empId').notEmpty().withMessage('EmpId is required'),
 	check('empname').notEmpty().withMessage('Name is required'),
 	check('empdob').notEmpty().withMessage('Date of Birth is required'),
 	check('joindate').notEmpty().withMessage('Join Date is required'),
@@ -102,7 +111,7 @@ router.put("/apiemp_update/:emp_id",
 		joinDate : req.body.joindate,
 		departmentId : req.body.departmentId,
 		salary : req.body.salary,
-		skill : JSON.parse(req.body.skill)
+		skills : JSON.stringify(req.body.skill)
 	};
 
 	Employee.update(employee, {
@@ -119,7 +128,7 @@ router.put("/apiemp_update/:emp_id",
 
 router.delete("/apiemp_delete/:emp_id", function (req, res) {
 	const id = req.params.emp_id
-	Employee.delete(id).then(res => {
+	Employee.destroy({ where : { id : id } }).then(res => {
 		return res.json({ success : true, message : 'Employee Deleted!' })
 	}).catch(err => {
 		console.log(err)
