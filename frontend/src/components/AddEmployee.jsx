@@ -14,7 +14,7 @@ function AddEmployee() {
     }, [])
 
     const getDepartments = () => {
-        axios.get('http://192.168.100.60:8080/apidep_select').then(res => {
+        axios.get('http://localhost:8080/apidep_select').then(res => {
             setDepartments(res.data.data)
         })
     }
@@ -38,7 +38,7 @@ function AddEmployee() {
             }
         } 
         
-        axios.post('http://192.168.100.60:8080/apiemp_insert', {empno, empname, empdob, joindate, departmentId, salary, skill}).then(res => {
+        axios.post('http://localhost:8080/apiemp_insert', {empno, empname, empdob, joindate, departmentId, salary, skill}).then(res => {
             navigate('/', { replace: true });
         }).catch(err => {
             console.log(err.response.status);
