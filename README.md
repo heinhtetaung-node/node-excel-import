@@ -1,6 +1,4 @@
-# Technical Interview
-
-## Part 2 – Backend Node.js
+# Node Excel excel export import tutorial
 
 # Requirements
 - Make sure mysql server running up in your local machine 
